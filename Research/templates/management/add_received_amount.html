@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if received_amount %}
+        Edit Received Amount
+    {% else %}
+        Add Received Amount
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2" style="box-shadow: 0px 3px 10px #bfbfbf; height: 100%; background-color: #ffffff;">
+            <!-- Sidebar content here -->
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2>
+                        {% if received_amount %}
+                            Edit Received Amount Details 
+                        {% else %}
+                            Add Received Amount Details 
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Alert Messages -->
+                    {% if messages %}
+                    <div class="alert-container mb-3">
+                        {% for message in messages %}
+                        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" 
+                             style="background-color: {% if message.tags == 'success' %}#d4edda; color: #155724;{% elif message.tags == 'error' %}#f8d7da; color: #721c24;{% endif %}">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Project Title:</strong></td>
+                                    <td><strong>{{ project.Project_Title }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Equipment">Equipment (in Rs):</label></td>
+                                    <td><input type="number" id="Equipment" name="Equipment" class="form-control" min="0" value="{{ received_amount.Equipment|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Consumables">Consumables (in Rs):</label></td>
+                                    <td><input type="number" id="Consumables" name="Consumables" class="form-control" min="0" value="{{ received_amount.Consumables|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Fellowship">Fellowship (in Rs):</label></td>
+                                    <td><input type="number" id="Fellowship" name="Fellowship" class="form-control" min="0" value="{{ received_amount.Fellowship|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Contingency">Contingency (in Rs):</label></td>
+                                    <td><input type="number" id="Contingency" name="Contingency" class="form-control" min="0" value="{{ received_amount.Contingency|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Travel">Travel (in Rs):</label></td>
+                                    <td><input type="number" id="Travel" name="Travel" class="form-control" min="0" value="{{ received_amount.Travel|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Field_Testing">Field Testing (in Rs):</label></td>
+                                    <td><input type="number" id="Field_Testing" name="Field_Testing" class="form-control" min="0" value="{{ received_amount.Field_Testing|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Miscellaneous">Miscellaneous (in Rs):</label></td>
+                                    <td><input type="number" id="Miscellaneous" name="Miscellaneous" class="form-control" min="0" value="{{ received_amount.Miscellaneous|default_if_none:0 }}" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div >
+                            <button type="submit" class="btn btn-primary">
+                                {% if received_amount %}
+                                    Update Received Amount
+                                {% else %}
+                                    Save Received Amount
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'project_list' %}" class="btn btn-secondary">Back to Projects</a>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,511 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+<!-- Load the custom filters -->
+
+{% block title %}View Projects{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <!-- Sidebar content (if any) -->
+        </div>
+
+        <!-- Main content area -->
+        <div class="col-md-10">
+            <div class="d-flex justify-content-center">
+                <h3 class="mt-4 mb-4 text-center font-weight-bold">View Projects</h3> <!-- Centered Title -->
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="m-0 font-weight-bold text-primary">Projects List</h5>
+                    <button id="exportBtn" class="btn btn-success btn-sm ms-2"><i class="fas fa-file-excel"></i> Export to Excel</button>
+                </div>
+
+                <div class="card-body">
+                    <!-- Filter/Search Area -->
+                    <div class="sticky-top bg-white py-2">
+                        <div class="row">
+                            <!-- Filters -->
+                            <div class="col-md-6">
+                                <label for="filterDepartment">Filter by Department</label>
+                                <select id="filterDepartment" class="form-select mb-3">
+                                    <option value="">All</option>
+                                    {% for department in departments %}
+                                    <option value="{{ department }}">{{ department }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filterStatus">Filter by Status</label>
+                                <select id="filterStatus" class="form-select mb-3">
+                                    <option value="">All</option>
+                                    <option value="ongoing">Ongoing</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filterYear">Filter by Year</label>
+                                <select id="filterYear" class="form-select mb-3">
+                                    <option value="">All</option>
+                                    {% for year in years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filterProjectType">Filter by Project Type</label>
+                                <select id="filterProjectType" class="form-select mb-3">
+                                    <option value="">All</option>
+                                    <option value="Government">Government</option>
+                                    <option value="Industry Sponsored Project">Industry Sponsored Project</option>
+                                    <option value="Consultancy Project">Consultancy Project</option>
+                                    <option value="International Project">International Project</option>
+                                    <option value="Alumni Project">Alumni Project</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filterFundingAgencyType">Filter by Funding Agency Type</label>
+                                <select id="filterFundingAgencyType" class="form-select mb-3">
+                                    <option value="">All</option>
+                                    <option value="Government Project">Government Project</option>
+                                    <option value="Non-Governmental Organization in India">Non-Governmental Organization in India</option>
+                                    <option value="International">International</option>
+                                    <option value="Industry">Industry</option>
+                                </select>
+                            </div>
+                            <!-- Search Bar -->
+                            <div class="col-md-12">
+                                <label for="searchInput">Search by Sanctioned Order, Project Name, or ID</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- Table Responsive Wrapper -->
+                    <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                        <table class="table table-bordered table-hover" id="projectsTable" width="100%" cellspacing="0">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">ID</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Year of Project Sanction</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Type Of Project</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Funding Agency Type</th>
+                                    <th colspan="5" class="text-center sticky-header">Principal Investigator</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-1</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-2</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-3</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-4</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-5</th>
+                                    <th colspan="5" class="text-center sticky-header">Co. PI-6</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Funding Agency</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Scheme</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header project-name-header">Project Name</th>
+                                    <th colspan="3" class="text-center sticky-header">Sanctioned-Amount (Rs)</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Project Duration (Months)</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Sanctioned Date</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Project Start Date</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Project End Date</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Total Amount Received (Rs)</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Sanctioned Order</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Status</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Actions</th>
+                                </tr>
+                                <tr>
+                                    <!-- Sub-columns under PI -->
+                                    <th class="text-center sticky-header">Name</th>
+                                    <th class="text-center sticky-header">PSRN</th>
+                                    <th class="text-center sticky-header">Designation</th>
+                                    <th class="text-center sticky-header">Campus</th>
+                                    <th class="text-center sticky-header">Department</th>
+                                    <!-- Repeat for Co. PI 1 to Co. PI 6 -->
+                                    {% for i in 6|get_range %}
+                                    <th class="text-center sticky-header">Name</th>
+                                    <th class="text-center sticky-header">PSRN</th>
+                                    <th class="text-center sticky-header">Designation</th>
+                                    <th class="text-center sticky-header">Campus</th>
+                                    <th class="text-center sticky-header">Department</th>
+                                    {% endfor %}
+                                    <!-- Sub-columns under Sanctioned-Amount -->
+                                    <th class="text-center sticky-header">CAPEX</th>
+                                    <th class="text-center sticky-header">RECURRING</th>
+                                    <th class="text-center sticky-header">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                <tr>
+                                    <td class="text-center">{{ project.project.id }}</td>
+                                    <td class="text-center">{{ project.project.year }}</td>
+                                    <td class="text-center">{{ project.project.get_project_type_display }}</td>
+                                    <td class="text-center">{{ project.project.get_funding_agency_type_display }}</td>
+                                    <!-- Principal Investigator -->
+                                    <td class="text-center">{{ project.project.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.department.name }}</td>
+                                    <!-- Co-PI1 -->
+                                    {% if project.project.Co_PI1 %}
+                                    <td class="text-center">{{ project.project.Co_PI1.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI1.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI1.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI1.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI1.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <!-- Co-PI2  -->
+                                    {% if project.project.Co_PI2 %}
+                                    <td class="text-center">{{ project.project.Co_PI2.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI2.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI2.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI2.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI2.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <!-- Co-PI3  -->
+                                    {% if project.project.Co_PI3 %}
+                                    <td class="text-center">{{ project.project.Co_PI3.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI3.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI3.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI3.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI3.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <!-- Co-PI4  -->
+                                    {% if project.project.Co_PI4 %}
+                                    <td class="text-center">{{ project.project.Co_PI4.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI4.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI4.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI4.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI4.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <!-- Co-PI5  -->
+                                    {% if project.project.Co_PI5 %}
+                                    <td class="text-center">{{ project.project.Co_PI5.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI5.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI5.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI5.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI5.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <!-- Co-PI6  -->
+                                    {% if project.project.Co_PI6 %}
+                                    <td class="text-center">{{ project.project.Co_PI6.Name_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI6.PSRN }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI6.Designation_PI }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI6.organization.name }}</td>
+                                    <td class="text-center">{{ project.project.Co_PI6.department.name }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+
+                                    <!-- Funding and Project Details -->
+                                    <td class="text-center">{{ project.project.funding_agency }}</td>
+                                    <td class="text-center">{{ project.project.funding_scheme }}</td>
+                                    <td class="text-center project-name-column">{{ project.project.Project_Title }}</td>
+                                    <!-- Sanctioned Amount Details -->
+                                    <td class="text-center">{{ project.project.CAPEX }}</td>
+                                    <td class="text-center">{{ project.project.OPEX }}</td>
+                                    <td class="text-center">{{ project.project.CAPEX|add:project.project.OPEX }}</td>
+                                    <!-- Additional Project Details -->
+                                    <td class="text-center">{{ project.project.project_duration }}</td>
+                                    {% if project.sanctiondate %}
+                                    <td class="text-center">{{ project.sanctiondate }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    {% if project.project.start_date %}
+                                    <td class="text-center">{{ project.project.start_date }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    {% if project.project.end_date %}
+                                    <td class="text-center">{{ project.project.end_date }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <td class="text-center">{{ project.total_received }}</td>
+                                    {% if project.project.start_date %}
+                                    <td class="text-center">{{ project.sanctionorder }}</td>
+                                    {% else %}
+                                    <td class="text-center">-</td>
+                                    {% endif %}
+                                    <td>
+                                        {% if project.project.status == 'ongoing' %}
+                                        <span class="badge bg-warning text-dark">Ongoing</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- Actions Column -->
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <a href="{% url 'edit_dates' project.project.id %}" class="btn btn-primary btn-sm">Add/Edit Dates</a>
+                                            <a href="{% url 'project_details' project.project.id %}" class="btn btn-info btn-sm">View Details</a>
+                                            {% if project.project.status == 'ongoing' %}
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" data-project-id="{{ project.project.id }}">Mark Completed</button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for confirming marking project as completed -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Mark as Completed</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to mark this project as completed?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmMarkCompleteBtn" class="btn btn-success">Yes, Mark Completed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .project-name-header {
+        width: 150px; /* Adjust width as needed */
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .project-name-column {
+        width: 150px; /* Ensure the content cells match the header width */
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sticky-top {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 1050;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmModal = document.getElementById('confirmModal');
+        confirmModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var projectId = button.getAttribute('data-project-id');
+            var confirmBtn = document.getElementById('confirmMarkCompleteBtn');
+            confirmBtn.href = "{% url 'mark_completed' 0 %}".replace('0', projectId);
+        });
+
+        // Export to Excel function
+        document.getElementById('exportBtn').addEventListener('click', function () {
+            var wb = XLSX.utils.book_new();
+            var ws_data = [];
+            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            // Define headers with merged cells
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // ID
+                { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, // Year of Project Sanction
+                { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } }, // Type of Project
+                { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } }, // Funding Agency Type
+                { s: { r: 0, c: 4 }, e: { r: 0, c: 8 } }, // Principal Investigator
+                { s: { r: 0, c: 9 }, e: { r: 0, c: 13 } }, // Co. PI-1
+                { s: { r: 0, c: 14 }, e: { r: 0, c: 18 } }, // Co. PI-2
+                { s: { r: 0, c: 19 }, e: { r: 0, c: 23 } }, // Co. PI-3
+                { s: { r: 0, c: 24 }, e: { r: 0, c: 28 } }, // Co. PI-4
+                { s: { r: 0, c: 29 }, e: { r: 0, c: 33 } }, // Co. PI-5
+                { s: { r: 0, c: 34 }, e: { r: 0, c: 38 } }, // Co. PI-6
+                { s: { r: 0, c: 39 }, e: { r: 1, c: 39 } }, // Funding Agency
+                { s: { r: 0, c: 40 }, e: { r: 1, c: 40 } }, // Scheme
+                { s: { r: 0, c: 41 }, e: { r: 1, c: 41 } }, // Project Name
+                { s: { r: 0, c: 42 }, e: { r: 0, c: 44 } }, // Sanctioned Amount
+                { s: { r: 0, c: 45 }, e: { r: 1, c: 45 } }, // Project Duration
+                { s: { r: 0, c: 46 }, e: { r: 1, c: 46 } }, // Sanctioned Date
+                { s: { r: 0, c: 47 }, e: { r: 1, c: 47 } }, // Project Start Date
+                { s: { r: 0, c: 48 }, e: { r: 1, c: 48 } }, // Project End Date
+                { s: { r: 0, c: 49 }, e: { r: 1, c: 49 } }, // Total Amount Received
+                { s: { r: 0, c: 50 }, e: { r: 1, c: 50 } }, // Sanctioned Order
+                { s: { r: 0, c: 51 }, e: { r: 1, c: 51 } }, // Status
+            ];
+
+            // First row headers
+            ws_data.push([
+                "ID", "Year of Project Sanction", "Type Of Project", "Funding Agency Type",
+                "Principal Investigator", "", "", "", "",
+                "Co. PI-1", "", "", "", "",
+                "Co. PI-2", "", "", "", "",
+                "Co. PI-3", "", "", "", "",
+                "Co. PI-4", "", "", "", "",
+                "Co. PI-5", "", "", "", "",
+                "Co. PI-6", "", "", "", "",
+                "Funding Agency", "Scheme", "Project Name", 
+                "Sanctioned-Amount (Rs)", "", "",
+                "Project Duration (Months)", "Sanctioned Date", "Project Start Date", "Project End Date", 
+                "Total Amount Received (Rs)", "Sanctioned Order", "Status"
+            ]);
+
+            // Second row headers
+            ws_data.push([
+                "", "", "", "",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "Name", "PSRN", "Designation", "Campus", "Department",
+                "", "", "",
+                "CAPEX", "RECURRING", "Total",
+                "", "", "", "", "", "", ""
+            ]);
+
+            // Add table data
+            var rows = document.querySelectorAll('#projectsTable tbody tr');
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var rowData = Array.from(cells).slice(0, -1).map(function(cell) { // Exclude the last cell (Actions)
+                    return cell.innerText.trim();
+                });
+                ws_data.push(rowData);
+            });
+
+            XLSX.utils.sheet_add_aoa(ws, ws_data);
+
+            // Set column widths
+            ws['!cols'] = [
+                { width: 10 }, { width: 20 }, { width: 20 }, { width: 20 }, // ID, Year, Type, Funding Agency Type
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // PI columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI1 columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI2 columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI3 columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI4 columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI5 columns
+                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI6 columns
+                { width: 20 }, { width: 20 }, { width: 20 }, // Funding Agency, Scheme, Project Name
+                { width: 15 }, { width: 15 }, { width: 15 }, // CAPEX, RECURRING, Total
+                { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 } // Others
+            ];
+
+            // Center alignment and wrap text for all cells
+            Object.keys(ws).forEach(function(key) {
+                if (key[0] === '!') return; // Skip meta keys like !ref, !cols, etc.
+                ws[key].s = {
+                    alignment: {
+                        horizontal: "center",
+                        vertical: "center",
+                        wrapText: true
+                    }
+                };
+            });
+
+            XLSX.utils.book_append_sheet(wb, ws, "Projects List");
+            XLSX.writeFile(wb, "Projects_List.xlsx");
+        });
+
+        // Attach event listeners to filter and search elements
+        searchInput.addEventListener('keyup', filterTable);
+        filterDepartment.addEventListener('change', filterTable);
+        filterStatus.addEventListener('change', filterTable);
+        filterYear.addEventListener('change', filterTable);
+        filterProjectType.addEventListener('change', filterTable);
+        filterFundingAgencyType.addEventListener('change', filterTable);
+
+        function filterTable() {
+            var searchTerm = searchInput.value.toLowerCase();
+            var departmentTerm = filterDepartment.value.toLowerCase();
+            var statusTerm = filterStatus.value.toLowerCase();
+            var yearTerm = filterYear.value.toLowerCase();
+            var projectTypeTerm = filterProjectType.value.toLowerCase();
+            var fundingAgencyTypeTerm = filterFundingAgencyType.value.toLowerCase();
+
+            // Get all table rows except the header
+            var table = document.getElementById('projectsTable');
+            var rows = Array.from(table.getElementsByTagName('tr')).slice(2);
+
+            rows.forEach(function (row) {
+                var cells = row.getElementsByTagName('td');
+                var id = cells[0].textContent.toLowerCase();
+                var year = cells[1].textContent.toLowerCase();
+                var projectType = cells[2].textContent.toLowerCase();
+                var fundingAgencyType = cells[3].textContent.toLowerCase();
+                var piDepartment = cells[8].textContent.toLowerCase();
+                var projectName = cells[20].textContent.toLowerCase();
+                var sanctionedOrder = cells[31].textContent.toLowerCase();
+                var status = cells[51].textContent.toLowerCase();
+
+                var matchesSearch = searchTerm === "" || id.includes(searchTerm) || projectName.includes(searchTerm) || sanctionedOrder.includes(searchTerm);
+                var matchesDepartment = departmentTerm === "" || piDepartment.includes(departmentTerm);
+                var matchesStatus = statusTerm === "" || status.includes(statusTerm);
+                var matchesYear = yearTerm === "" || year.includes(yearTerm);
+                var matchesProjectType = projectTypeTerm === "" || projectType.includes(projectTypeTerm);
+                var matchesFundingAgencyType = fundingAgencyTypeTerm === "" || fundingAgencyType.includes(fundingAgencyTypeTerm);
+
+                if (matchesSearch && matchesDepartment && matchesStatus && matchesYear && matchesProjectType && matchesFundingAgencyType) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

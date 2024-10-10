@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Add/Edit Installment{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2" style="box-shadow: 0px 3px 10px #bfbfbf; height: 100%; background-color: #ffffff;">
+            <!-- Sidebar content here -->
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9">
+            <div class="content-wrapper card shadow-sm p-4">
+                <h1 class="text-center text-uppercase mb-4 fade-in"> Add/Edit Installment </h1>
+
+                <!-- Display Success or Error Messages -->
+                {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                    <div class="alert 
+                        {% if 'success' in message.tags %}alert-success{% elif 'error' in message.tags %}alert-danger{% elif 'warning' in message.tags %}alert-warning{% elif 'info' in message.tags %}alert-info{% endif %} 
+                        alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="installment_year" class="form-label">Financial Year:<span class="text-danger">*</span></label>
+                            <select id="installment_year" name="installment_year" class="form-select" required>
+                                <option value="">Select Year</option>
+                                {% for year in financial_years %}
+                                    <option value="{{ year.id }}">{{ year.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="amount" class="form-label">Amount (in Rs):<span class="text-danger">*</span></label>
+                            <input type="number" id="amount" name="amount" class="form-control" min="0" required>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Save Installment</button>
+                        <a href="{% url 'project_list' %}" class="btn btn-secondary ms-3">Back to Projects</a>
+                    </div>
+                </form>
+
+                <hr>
+
+                <h2 class="text-primary mt-5 fade-in">Installments Log</h2>
+                <table class="table table-bordered table-hover table-striped mt-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Financial Year</th>
+                            <th>Amount (in Rs)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for installment in installments %}
+                        <tr>
+                            <td>{{ installment.installment_year.name }}</td>
+                            <td>{{ installment.amount }}</td>
+                            <td>
+                                <a href="{% url 'edit_installment' project.id installment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{% url 'bifurcate_budget' project.id installment.id %}" class="btn btn-info btn-sm">Bifurcate Budget</a>
+                                <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" 
+                                onclick="setDeleteUrl('{% url 'delete_installment' project.id installment.id %}')">
+                                Delete
+                             </a>
+
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No installments added yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this installment?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="#" id="confirmDeleteButton" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setDeleteUrl(url) {
+    var confirmButton = document.getElementById('confirmDeleteButton');
+    confirmButton.setAttribute('href', url);
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-bordered {
+        border: 2px solid #000; /* Bold border around the entire table */
+    }
+
+    .table-bordered th, 
+    .table-bordered td {
+        border: 2px solid #000; /* Bold border around each cell */
+    }
+
+    .fade-in {
+        animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    .content-wrapper {
+        border-radius: 0.5rem;
+        padding: 2rem;
+        background-color: #f8f9fa;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+
+    .table {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .modal-content {
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Importing Bootstrap JS and Tailwind CSS -->
+{% endblock %}
+ 

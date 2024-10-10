@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit Expenditure
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Expenditure</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <input type="hidden" name="expenditure_id" value="{{ expenditure.id }}">
+        <div class="mb-3">
+            <label for="year_expenditure" class="form-label">Financial Year:</label>
+            <select id="year_expenditure" name="year_expenditure" class="form-select">
+                <option value="">Select Year</option>
+                {% for year in financial_years %}
+                    <option value="{{ year.id }}" {% if year.id == expenditure.year.id %}selected{% endif %}>{{ year.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="expenditure_type" class="form-label">Expenditure Type</label>
+            <select id="expenditure_type" name="expenditure_type" class="form-control" required>
+                <option value="">-- Select an Option --</option>
+                {% for type_option in expenditure_types %}
+                    <option value="{{ type_option }}" {% if type_option == expenditure.expenditure_type %}selected{% endif %}>
+                        {{ type_option }}
+                    </option>
+                {% endfor %}
+            </select>
+                    </div>
+        <div class="mb-3">
+            <label for="Expenditure_date" class="form-label">Date</label>
+            <input type="date" id="Expenditure_date" name="Expenditure_date" class="form-control" value="{{ expenditure.Expenditure_date|date:'Y-m-d' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" id="amount" name="amount" class="form-control" value="{{ expenditure.amount }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="type" class="form-label">Type (Optional)</label>
+            <input type="text" id="type" name="type" class="form-control" value="{{ expenditure.type }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'add_expenditure' project_id=expenditure.project.id %}" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+{% endblock %}

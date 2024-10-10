@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if budget %}
+        Edit Budget
+    {% else %}
+        Add Budget
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-2" style="box-shadow: 0px 3px 10px #bfbfbf; height: 100%; background-color: #ffffff;">
+            <!-- Sidebar content here -->
+        </div>
+
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        {% if budget %}
+                            Edit Sanctioned Amount Details 
+                        {% else %}
+                            Add Sanctioned Amount Details 
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="alert-container mb-4">
+                        {% for message in messages %}
+                        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" 
+                             style="background-color: {% if message.tags == 'success' %}#d4edda; color: #155724;{% elif message.tags == 'error' %}#f8d7da; color: #721c24;{% endif %}">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Project Title:</strong></td>
+                                    <td><strong>{{ project.Project_Title }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Equipment">Sanctioned Date:</label></td>
+                                    <td><input type="date" id="sanctiondate" name="sanctiondate" class="form-control"  value="{{ budget.sanctiondate|date:'Y-m-d' }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Equipment">Sanctioned Order:</label></td>
+                                    <td><input type="text" id="sanctionorder" name="sanctionorder" class="form-control" min="0" value="{{ budget.sanctionorder }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Equipment">Equipment (in Rs):</label></td>
+                                    <td><input type="number" id="Equipment" name="Equipment" class="form-control" min="0" value="{{ budget.Equipment|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Consumables">Consumables (in Rs):</label></td>
+                                    <td><input type="number" id="Consumables" name="Consumables" class="form-control" min="0" value="{{ budget.Consumables|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Fellowship">Fellowship (in Rs):</label></td>
+                                    <td><input type="number" id="Fellowship" name="Fellowship" class="form-control" min="0" value="{{ budget.Fellowship|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Contingency">Contingency (in Rs):</label></td>
+                                    <td><input type="number" id="Contingency" name="Contingency" class="form-control" min="0" value="{{ budget.Contingency|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Travel">Travel (in Rs):</label></td>
+                                    <td><input type="number" id="Travel" name="Travel" class="form-control" min="0" value="{{ budget.Travel|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Field_Testing">Field Testing (in Rs):</label></td>
+                                    <td><input type="number" id="Field_Testing" name="Field_Testing" class="form-control" min="0" value="{{ budget.Field_Testing|default_if_none:0 }}" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="Miscellaneous">Miscellaneous (in Rs):</label></td>
+                                    <td><input type="number" id="Miscellaneous" name="Miscellaneous" class="form-control" min="0" value="{{ budget.Miscellaneous|default_if_none:0 }}" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                {% if budget %}
+                                    Update Budget
+                                {% else %}
+                                    Save Budget
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'project_list' %}" class="btn btn-secondary">Back to Projects</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.3;
+            color: #333;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 {
+            font-size: 14px;
+            color: #007bff;
+            text-align: center;
+            margin: 10px 0;
+        }
+        h2 {
+            font-size: 12px;
+            color: #007bff;
+            margin: 10px 0 5px;
+            border-bottom: 1px solid #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 3px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .compact-table td, .compact-table th {
+            padding: 2px;
+        }
+        @media print {
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Project Details</h1>
+
+    <h2>Project Information</h2>
+    <table class="compact-table">
+        <tr>
+            <td><strong>Project Title:</strong></td>
+            <td>{{ project.Project_Title|default:"No data available" }}</td>
+            <td><strong>PSRN:</strong></td>
+            <td>{{ project.PSRN|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Principal Investigator:</strong></td>
+            <td>{{ project.Name_PI|default:"No data available" }}</td>
+            <td><strong>Designation:</strong></td>
+            <td>{{ project.Designation_PI|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Organization:</strong></td>
+            <td>{{ project.organization.name|default:"No data available" }}</td>
+            <td><strong>Department:</strong></td>
+            <td>{{ project.department.name|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Project Type:</strong></td>
+            <td>{{ project.get_project_type_display|default:"No data available" }}</td>
+            <td><strong>Funding Agency:</strong></td>
+            <td>{{ project.funding_agency|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Funding Scheme:</strong></td>
+            <td>{{ project.funding_scheme|default:"No data available" }}</td>
+            <td><strong>Funding Agency Type:</strong></td>
+            <td>{{ project.get_funding_agency_type_display|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>CAPEX:</strong></td>
+            <td>Rs. {{ project.CAPEX|default:"No data available" }}</td>
+            <td><strong>OPEX:</strong></td>
+            <td>Rs. {{ project.OPEX|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Budget:</strong></td>
+            <td>Rs. {{ project.CAPEX|add:project.OPEX|default:"No data available" }}</td>
+            <td><strong>Duration (months):</strong></td>
+            <td>{{ project.project_duration|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Start Date:</strong></td>
+            <td>{{ project.start_date|date:"d-m-Y"|default:"No data available" }}</td>
+            <td><strong>End Date:</strong></td>
+            <td>{{ project.end_date|date:"d-m-Y"|default:"No data available" }}</td>
+        </tr>
+    </table>
+
+    <h2>Co-PIs Information</h2>
+    <table class="compact-table">
+        <tr>
+            <th>Name</th>
+            <th>PSRN</th>
+            <th>Designation</th>
+            <th>Organization</th>
+            <th>Department</th>
+        </tr>
+        {% if principal_investigators %}
+            {% for pi in principal_investigators %}
+            <tr>
+                <td>{{ pi.Name_PI|default:"No data available" }}</td>
+                <td>{{ pi.PSRN|default:"No data available" }}</td>
+                <td>{{ pi.Designation_PI|default:"No data available" }}</td>
+                <td>{{ pi.organization.name|default:"No data available" }}</td>
+                <td>{{ pi.department.name|default:"No data available" }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No Co-PIs information available for this project.</td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <h2>Financial Overview</h2>
+    <table class="compact-table">
+        <tr>
+            <td><strong>Total Sanctioned:</strong></td>
+            <td>Rs. {{ total_sanctioned|default:"No data available" }}</td>
+            <td><strong>Total Received:</strong></td>
+            <td>Rs. {{ total_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Expenditure:</strong></td>
+            <td>Rs. {{ total_expenditure|default:"No data available" }}</td>
+            <td><strong>Total Installment:</strong></td>
+            <td>Rs. {{ total_installments_amount|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Balance (Sanctioned):</strong></td>
+            <td>Rs. {{ balance_sanctioned|default:"No data available" }}</td>
+            <td><strong>Balance (Received):</strong></td>
+            <td>Rs. {{ balance_received|default:"No data available" }}</td>
+        </tr>
+    </table>
+
+    <h2>Amount Sanctioned Information</h2>
+    {% if budget %}
+    <table class="compact-table">
+        <tr>
+            <td><strong>Sanction Date:</strong></td>
+            <td>{{ budget.sanctiondate|date:"d-m-Y"|default:"No data available" }}</td>
+            <td><strong>Sanction Order:</strong></td>
+            <td>{{ budget.sanctionorder|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Equipment:</strong></td>
+            <td>Rs. {{ budget.Equipment|default:"No data available" }}</td>
+            <td><strong>Consumables:</strong></td>
+            <td>Rs. {{ budget.Consumables|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Fellowship:</strong></td>
+            <td>Rs. {{ budget.Fellowship|default:"No data available" }}</td>
+            <td><strong>Contingency:</strong></td>
+            <td>Rs. {{ budget.Contingency|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Travel:</strong></td>
+            <td>Rs. {{ budget.Travel|default:"No data available" }}</td>
+            <td><strong>Field Testing:</strong></td>
+            <td>Rs. {{ budget.Field_Testing|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Miscellaneous:</strong></td>
+            <td>Rs. {{ budget.Miscellaneous|default:"No data available" }}</td>
+            <td><strong>Total Sanctioned:</strong></td>
+            <td><strong>Rs. {{ total_sanctioned|default:"No data available" }}</strong></td>
+        </tr>
+    </table>
+    {% else %}
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td class="text-center"><strong>Amount sanctioned information available for this project.</strong></td>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+    <h2>Received Amount Information</h2>
+    {% if received_amount %}
+    <table class="compact-table">
+        <tr>
+            <td><strong>Equipment:</strong></td>
+            <td>Rs. {{ received_amount.Equipment|default:"No data available" }}</td>
+            <td><strong>Consumables:</strong></td>
+            <td>Rs. {{ received_amount.Consumables|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Fellowship:</strong></td>
+            <td>Rs. {{ received_amount.Fellowship|default:"No data available" }}</td>
+            <td><strong>Contingency:</strong></td>
+            <td>Rs. {{ received_amount.Contingency|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Travel:</strong></td>
+            <td>Rs. {{ received_amount.Travel|default:"No data available" }}</td>
+            <td><strong>Field Testing:</strong></td>
+            <td>Rs. {{ received_amount.Field_Testing|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Miscellaneous:</strong></td>
+            <td>Rs. {{ received_amount.Miscellaneous|default:"No data available" }}</td>
+            <td><strong>Total Received:</strong></td>
+            <td><strong>Rs. {{ total_received|default:"No data available" }}</strong></td>
+        </tr>
+    </table>
+    {% else %}
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td class="text-center"><strong>No received amount information available for this project.</strong></td>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+    <h2>Installments and Bifurcation by Financial Year</h2>
+    <table class="compact-table">
+        <tr>
+            <th>Year</th>
+            <th>Equipment</th>
+            <th>Consumables</th>
+            <th>Fellowship</th>
+            <th>Contingency</th>
+            <th>Travel</th>
+            <th>Field Testing</th>
+            <th>Miscellaneous</th>
+            <th>Total</th>
+        </tr>
+        {% if bifurcation_data %}
+            {% for data in bifurcation_data %}
+            <tr>
+                <td>{{ data.year|default:"No data available" }}</td>
+                <td>{{ data.Equipment|default:"No data available" }}</td>
+                <td>{{ data.Consumables|default:"No data available" }}</td>
+                <td>{{ data.Fellowship|default:"No data available" }}</td>
+                <td>{{ data.Contingency|default:"No data available" }}</td>
+                <td>{{ data.Travel|default:"No data available" }}</td>
+                <td>{{ data.Field_Testing|default:"No data available" }}</td>
+                <td>{{ data.Miscellaneous|default:"No data available" }}</td>
+                <td>{{ data.Total|default:"No data available" }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="9" class="text-center">No bifurcation data available for this project.</td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <h2>Remaining Balance Information</h2>
+    <table class="compact-table">
+        <tr>
+            <th>Domain</th>
+            <th>Remaining (Sanctioned)</th>
+            <th>Remaining (Received)</th>
+        </tr>
+        <tr>
+            <td>Equipment</td>
+            <td>{{ balance_equipment_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_equipment_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Consumables</td>
+            <td>{{ balance_consumables_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_consumables_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Fellowship</td>
+            <td>{{ balance_fellowship_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_fellowship_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Contingency</td>
+            <td>{{ balance_contingency_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_contingency_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Travel</td>
+            <td>{{ balance_travel_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_travel_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Field Testing</td>
+            <td>{{ balance_field_testing_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_field_testing_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td>Miscellaneous</td>
+            <td>{{ balance_miscellaneous_sanctioned|default:"No data available" }}</td>
+            <td>{{ balance_miscellaneous_received|default:"No data available" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>{{ balance_sanctioned|default:"No data available" }}</strong></td>
+            <td><strong>{{ balance_received|default:"No data available" }}</strong></td>
+        </tr>
+    </table>
+
+    <h2>Detailed Expenditures</h2>
+    <table class="compact-table">
+        <tr>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Amount (Rs.)</th>
+            <th>Expenditure Type</th>
+        </tr>
+        {% if expenditures %}
+            {% for expenditure in expenditures %}
+            <tr>
+                <td>{{ expenditure.get_type_display|default:"No data available" }}</td>
+                <td>{{ expenditure.Expenditure_date|date:"d-m-Y"|default:"No data available" }}</td>
+                <td>Rs. {{ expenditure.amount|default:"No data available" }}</td>
+                <td>{{ expenditure.get_expenditure_type_display|default:"No data available" }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center">No expenditure information available for this project.</td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <h2>Total Expenditures by Type</h2>
+    <table class="compact-table">
+        <tr>
+            <th>Year</th>
+            <th>Equipment</th>
+            <th>Consumables</th>
+            <th>Fellowship</th>
+            <th>Contingency</th>
+            <th>Travel</th>
+            <th>Field Testing</th>
+            <th>Miscellaneous</th>
+        </tr>
+        {% if financial_year_expenditure_totals %}
+            {% for year, types in financial_year_expenditure_totals.items %}
+            <tr>
+                <td>{{ year|default:"No data available" }}</td>
+                <td>{{ types.Equipment|default:"0" }}</td>
+                <td>{{ types.Consumables|default:"0" }}</td>
+                <td>{{ types.Fellowship|default:"0" }}</td>
+                <td>{{ types.Contingency|default:"0" }}</td>
+                <td>{{ types.Travel|default:"0" }}</td>
+                <td>{{ types.Field_Testing|default:"0" }}</td>
+                <td>{{ types.Miscellaneous|default:"0" }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No expenditure totals information available for this project.</td>
+            </tr>
+        {% endif %}
+    </table>
+</body>
+</html>

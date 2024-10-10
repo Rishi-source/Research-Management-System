@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Installment{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2" style="box-shadow: 0px 3px 10px #bfbfbf; height: 100%; background-color: #ffffff;">
+            <!-- Sidebar content here -->
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9">
+            <div class="content-wrapper card shadow-sm p-4">
+                <h1 class="text-center text-uppercase mb-4 fade-in">Edit Installment for {{ installment.installment_year }}</h1>
+
+                <!-- Display Success or Error Messages -->
+                {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" style="background-color: {% if message.tags == 'success' %}#d4edda; color: #155724;{% elif message.tags == 'error' %}#f8d7da; color: #721c24;{% endif %}">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount (in Rs):<span class="text-danger">*</span></label>
+                        <input type="number" id="amount" name="amount" class="form-control" min="0" value="{{ installment.amount }}" required>
+                    </div>
+                    <br>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Update Installment</button>
+                        <a href="{% url 'add_installment' project.id %}" class="btn btn-secondary ms-3">Back to List</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fade-in {
+        animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    .content-wrapper {
+        border-radius: 0.5rem;
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .card {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Importing Bootstrap JS and Tailwind CSS -->
+{% endblock %}

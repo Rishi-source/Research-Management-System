@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">Project Management System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{% url 'notification' %}">Notifications</a></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-xxxxxx"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-xxxxxx"
+    crossorigin="anonymous"></script>
+<style>
+    .navbar {
+        box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+    }
+
+    .navbar.scrolled {
+        background-color: #FFFFFF;
+        color: #000000;
+    }
+
+    .navbar-brand {
+        transition: transform 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        transform: scale(1.02);
+    }
+
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>

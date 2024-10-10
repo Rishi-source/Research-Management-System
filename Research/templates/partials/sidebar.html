@@ -1,0 +1,183 @@
+<nav id="sidebar" class="sidebar compact" data-state="compact">
+  <button id="sidebarToggle" class="btn btn-light" style="margin: 10px;">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <ul class="list-unstyled components">
+    <!-- Existing sidebar items -->
+    <li style="margin-top: 15px;">
+      <a href="{% url 'dashboard' %}" class="text-dark">
+        <i class="fas fa-tachometer-alt"></i> <span class="sidebar-text">Dashboard</span>
+      </a>
+    </li>
+    <br>
+    <li>
+      <a href="#projects" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle text-dark">
+        <i class="fas fa-project-diagram"></i> <span class="sidebar-text">Project</span>
+      </a>
+      <ul class="collapse list-unstyled" id="projects">
+        <li style="margin: 10px 0;">
+          <a href="{% url 'view_projects' %}" class="text-dark">
+            <i class="fas fa-eye"></i> <span class="sidebar-text">View Projects</span>
+          </a>
+        </li>
+        <li style="margin: 10px 0;">
+          <a href="{% url 'project_list' %}" class="text-dark">
+            <i class="fas fa-plus-circle"></i> <span class="sidebar-text">Add Projects Details</span>
+          </a>
+        </li>
+        <li class="{% if request.resolver_match.url_name == 'add_project' %}active{% endif %}" style="margin: 10px 0;">
+          <a href="{% url 'add_project' %}" class="text-dark">
+            <i class="fas fa-folder-plus"></i> <span class="sidebar-text">Add Project</span>
+          </a>
+        </li>
+
+      </ul>
+    </li>
+    <br>
+
+    <!-- New Dropdown: Add Fields -->
+    <li>
+      <a href="#addFields" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle text-dark">
+        <i class="fas fa-plus-square"></i> <span class="sidebar-text">Add Fields</span>
+      </a>
+      <ul class="collapse list-unstyled" id="addFields">
+        <li style="margin: 10px 0;">
+          <a href="{% url 'manage_departments' %}" class="text-dark">
+            <i class="fas fa-building"></i> <span class="sidebar-text">Add Departments</span>
+          </a>
+        </li>
+        <li style="margin: 10px 0;">
+          <a href="{% url 'manage_financial_years' %}" class="text-dark">
+            <i class="fas fa-calendar-alt"></i> <span class="sidebar-text">Add Financial Year</span>
+          </a>
+        </li>
+        <li style="margin: 10px 0;">
+          <a href="{% url 'manage_organizations' %}" class="text-dark">
+            <i class="fas fa-building"></i> <span class="sidebar-text">Add Organisations</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+  <style>
+    #sidebar {
+      transition: all 0.3s ease;
+      background-color: #ffffff;
+      color: #000;
+      position: fixed;
+      left: 0;
+      top: 56px;
+      height: calc(100% - 56px);
+      z-index: 1000;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+
+    #sidebar.compact {
+      width: 60px;
+    }
+
+    #sidebar.expanded {
+      width: 250px;
+    }
+
+    #sidebar .list-unstyled li a {
+      color: #000;
+      text-decoration: none;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+    }
+
+    #sidebar .list-unstyled li a:hover,
+    #sidebar .list-unstyled li.active>a {
+      background-color: #0080ff;
+      color: #fff;
+    }
+
+    #sidebar .dropdown-toggle::after {
+      display: inline-block;
+      margin-left: .255em;
+      vertical-align: .255em;
+      content: "";
+      border-top: .3em solid;
+      border-right: .3em solid transparent;
+      border-bottom: 0;
+      border-left: .3em solid transparent;
+    }
+
+    #sidebar .sidebar-text {
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    #sidebar.compact .sidebar-text {
+      display: none;
+    }
+
+    #sidebar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb {
+      background: #9797b5;
+      border-radius: 4px;
+    }
+
+    #sidebar::-webkit-scrollbar-thumb:hover {
+      background: #0056b3;
+    }
+  </style>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var sidebar = document.getElementById('sidebar');
+    var sidebarToggle = document.getElementById('sidebarToggle');
+    var isMobile = window.innerWidth <= 767.98;
+
+    // Initial state
+    if (isMobile) {
+      sidebar.classList.add('compact');
+      sidebar.classList.remove('expanded');
+      sidebar.setAttribute('data-state', 'compact');
+    } else {
+      sidebar.classList.add('expanded');
+      sidebar.classList.remove('compact');
+      sidebar.setAttribute('data-state', 'expanded');
+    }
+
+    sidebarToggle.addEventListener('click', function () {
+      var currentState = sidebar.getAttribute('data-state');
+      if (currentState === 'compact') {
+        sidebar.classList.add('expanded');
+        sidebar.classList.remove('compact');
+        sidebar.setAttribute('data-state', 'expanded');
+      } else {
+        sidebar.classList.add('compact');
+        sidebar.classList.remove('expanded');
+        sidebar.setAttribute('data-state', 'compact');
+      }
+    });
+
+    // Update state on window resize
+    window.addEventListener('resize', function () {
+      isMobile = window.innerWidth <= 767.98;
+      if (isMobile && sidebar.getAttribute('data-state') === 'expanded') {
+        sidebar.classList.add('compact');
+        sidebar.classList.remove('expanded');
+        sidebar.setAttribute('data-state', 'compact');
+      } else if (!isMobile && sidebar.getAttribute('data-state') === 'compact') {
+        sidebar.classList.add('expanded');
+        sidebar.classList.remove('compact');
+        sidebar.setAttribute('data-state', 'expanded');
+      }
+    });
+  });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

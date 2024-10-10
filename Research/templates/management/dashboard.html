@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- User Manual and Notice -->
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-30px);
+      }
+      60% {
+        transform: translateY(-15px);
+      }
+    }
+
+    .bounce {
+      animation: bounce 2s;
+    }
+
+    .card {
+      box-shadow: 0px 3px 10px #bfbfbf;
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+      font-family: 'Lato', sans-serif;
+      border-radius: 10px;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-10px);
+      box-shadow: 0px 6px 15px #bfbfbf;
+    }
+
+    .card-info-hover:hover {
+      background-color: #138496;
+      transform: scale(1.05);
+    }
+
+    .card-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+    }
+
+    .card-text {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Lato', sans-serif;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .total-amount {
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 10px;
+      font-family: 'Lato', sans-serif;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+      margin-left: 250px;
+    }
+
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .notification-scroll {
+      max-height: 1200px;
+      overflow-y: auto;
+    }
+
+    .notification-item {
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease;
+    }
+
+    .notification-item:hover {
+      background-color: #f1f1f1;
+    }
+
+    .notification {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .notification .message {
+      flex-grow: 1;
+      margin-right: 20px;
+    }
+
+    .notification .timestamp {
+      white-space: nowrap;
+      font-size: 0.85em;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+      }
+
+      .col-md-4 {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+  
+  <div class="alert alert-info border-info rounded-0 mb-4 text-center" role="alert">
+    <div class="d-flex justify-content-center align-items-center">
+      <span><strong>Welcome!</strong> If you are new to this site, please read the <a href="https://vivid-sardine-9e8.notion.site/Project-Management-and-Information-System-f3c6ed915c014d12a05858e7c7d4da12" target="_blank">User Manual</a> for guidance. If you have any confusion, feel free to reach out to support.</span>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-4 mb-4">
+      <a class="card-link">
+        <div class="card text-white bg-primary mb-3 card-hover">
+          <div class="card-body d-flex justify-content-center align-items-center flex-column">
+            <i class="fas fa-project-diagram fa-2x mb-3"></i>
+            <h5 class="card-title">Ongoing Projects</h5>
+            <p class="card-text display-4">{{ ongoing_projects_count }}</p>
+            <p class="total-amount">Total Sanctioned: Rs. {{ ongoing_sanctioned_total }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  
+    <div class="col-md-4 mb-4">
+      <a class="card-link">
+        <div class="card text-white bg-success mb-3 card-hover">
+          <div class="card-body d-flex justify-content-center align-items-center flex-column">
+            <i class="fas fa-check-circle fa-2x mb-3"></i>
+            <h5 class="card-title">Completed Projects</h5>
+            <p class="card-text display-4">{{ completed_projects_count }}</p>
+            <p class="total-amount">Total Sanctioned: Rs. {{ completed_sanctioned_total }}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+    
+  <div class="modal fade" id="mobileWarningModal" tabindex="-1" aria-labelledby="mobileWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mobileWarningModalLabel">Best View on Desktop or Laptop</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          This site is optimized for desktop and laptop screens. For the best experience, please view it on a larger screen.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      // Add a bounce effect when the alert is first shown
+      $('.alert').hide().fadeIn(1000).delay(3000).queue(function(next) {
+        $(this).addClass('bounce');
+        next();
+      });
+
+      // Smooth scrolling for internal links
+      $('a[href^="#"]').on('click', function (event) {
+        event.preventDefault();
+        var target = $(this.getAttribute('href'));
+        if (target.length) {
+          $('html, body').stop().animate({
+            scrollTop: target.offset().top
+          }, 1000);
+        }
+      });
+
+      // Show mobile warning modal only if not already shown
+      if (!sessionStorage.getItem('mobileWarningShown')) {
+        if ($(window).width() < 768) {
+          $('#mobileWarningModal').modal('show');
+        }
+        sessionStorage.setItem('mobileWarningShown', 'true');
+      }
+    });
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+{% endblock %}

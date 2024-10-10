@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Project Dates{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <!-- Sidebar content (if any) -->
+        </div>
+        
+        <!-- Main content area -->
+        <div class="col-md-10">
+            <h3 class="mt-4 mb-4">Edit Dates for {{ project.Project_Title }}</h3>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="start_date" class="form-label">Start Date:</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ project.start_date|date:'Y-m-d' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="end_date" class="form-label">End Date:</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ project.end_date|date:'Y-m-d' }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'view_projects' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Project{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2" style="box-shadow: 0px 3px 10px #bfbfbf; height: 100%; background-color: #ffffff;">
+            <!-- Sidebar content here -->
+        </div>
+
+        <!-- Main content area -->
+        <div class="col-md-10">
+            <h1 class="text-center text-uppercase mb-4 fade-in">Edit Sanctioned Project</h1>
+
+            <!-- Display Success or Error Messages -->
+            {% if messages %}
+            <div class="alert-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form id="endorsement-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Initial Information Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><strong>Initial Information</strong></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="year_project_sanctioned" class="form-label">Financial Year:</label>
+                                <select id="year_project_sanctioned" name="year_project_sanctioned" class="form-select">
+                                    <option value="">Select Year</option>
+                                    {% for year in financial_years %}
+                                        <option value="{{ year.id }}" {% if endorsement.year.id == year.id %}selected{% endif %}>{{ year.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Project_Title" class="form-label">Project Title:</label>
+                                <input type="text" id="Project_Title" name="Project_Title" class="form-control" value="{{ endorsement.Project_Title }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="PSRN" class="form-label">PSRN:</label>
+                                <input type="text" id="PSRN" name="PSRN" class="form-control" value="{{ endorsement.PSRN }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Name_PI" class="form-label">Name of Principal Investigator:</label>
+                                <input type="text" id="Name_PI" name="Name_PI" class="form-control" value="{{ endorsement.Name_PI }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Designation_PI" class="form-label">Designation:</label>
+                                <input type="text" id="Designation_PI" name="Designation_PI" class="form-control" value="{{ endorsement.Designation_PI }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="organization" class="form-label">Organization:</label>
+                                <select id="organization" name="organization" class="form-select">
+                                    <option value="">-- Select an Option --</option>
+                                    {% for org in organizations %}
+                                    <option value="{{ org.id }}" {% if endorsement.organization.id == org.id %}selected{% endif %}>{{ org.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="department" class="form-label">Department:</label>
+                                <select id="department" name="department" class="form-select">
+                                    <option value="">-- Select an Option --</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if endorsement.department.id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Principal Investigators (PIs) Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><strong>Co. Principal Investigators (Co. PIs)</strong></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label><strong>Select Co. Principal Investigators (up to 6):</strong></label>
+                            <input type="text" id="pi-search" class="form-control mb-3" placeholder="Search for Co. PIs..." onkeyup="filterPIList()">
+
+                            <div id="pi-container" class="mt-2" style="max-height: 200px; overflow-y: auto;">
+                                {% for pi in principal_investigators %}
+                                <div class="form-check pi-item">
+                                    <input type="checkbox" class="form-check-input pi-checkbox" id="pi{{ pi.id }}" name="pi_select" value="{{ pi.id }}"
+                                           {% if pi.id in co_pi_ids %} checked {% endif %}>
+                                    <label class="form-check-label" for="pi{{ pi.id }}">{{ pi.Name_PI }} ({{ pi.Designation_PI }})</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <a href="{% url 'add_pi' %}" class="btn btn-outline-primary mb-2">Add New Co. PI</a>
+                    </div>
+                </div>
+
+                <!-- Additional Details Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><strong>Additional Details</strong></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="project_type" class="form-label">Project Type:</label>
+                                <select id="project_type" name="project_type" class="form-select">
+                                    <option value="">-- Select Project Type --</option>
+                                    <option value="Government" {% if endorsement.project_type == 'Government' %}selected{% endif %}>Government</option>
+                                    <option value="Industry Sponsored Project" {% if endorsement.project_type == 'Industry Sponsored Project' %}selected{% endif %}>Industry Sponsored Project</option>
+                                    <option value="Consultancy Project" {% if endorsement.project_type == 'Consultancy Project' %}selected{% endif %}>Consultancy Project</option>
+                                    <option value="International Project" {% if endorsement.project_type == 'International Project' %}selected{% endif %}>International Project</option>
+                                    <option value="Alumni Project" {% if endorsement.project_type == 'Alumni Project' %}selected{% endif %}>Alumni Project</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="funding_agency" class="form-label">Funding Agency:</label>
+                                <input type="text" id="funding_agency" name="funding_agency" class="form-control" value="{{ endorsement.funding_agency }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="funding_scheme" class="form-label">Funding Scheme:</label>
+                                <input type="text" id="funding_scheme" name="funding_scheme" class="form-control" value="{{ endorsement.funding_scheme }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="funding_agency_type" class="form-label">Funding Agency Type:</label>
+                                <select id="funding_agency_type" name="funding_agency_type" class="form-select">
+                                    <option value="">-- Select Funding Agency Type --</option>
+                                    <option value="Government Project" {% if endorsement.funding_agency_type == 'Government Project' %}selected{% endif %}>Government Project</option>
+                                    <option value="Non-Governmental Organization in India" {% if endorsement.funding_agency_type == 'Non-Governmental Organization in India' %}selected{% endif %}>Non-Governmental Organization in India</option>
+                                    <option value="International" {% if endorsement.funding_agency_type == 'International' %}selected{% endif %}>International</option>
+                                    <option value="Industry" {% if endorsement.funding_agency_type == 'Industry' %}selected{% endif %}>Industry</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="CAPEX" class="form-label">CAPEX:</label>
+                                <input type="number" id="CAPEX" name="CAPEX" class="form-control" value="{{ endorsement.CAPEX }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="OPEX" class="form-label">OPEX:</label>
+                                <input type="number" id="OPEX" name="OPEX" class="form-control" value="{{ endorsement.OPEX }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="project_duration" class="form-label">Project Duration (months):</label>
+                                <input type="number" id="project_duration" name="project_duration" class="form-control" value="{{ endorsement.project_duration }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="commencement_date_of_project" class="form-label">Start Date of Project:</label>
+                                <input type="date" id="commencement_date_of_project" name="commencement_date_of_project" class="form-control" value="{{ endorsement.start_date|date:'Y-m-d' }}" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date_of_project" class="form-label">End Date of Project:</label>
+                                <input type="date" id="end_date_of_project" name="end_date_of_project" class="form-control" value="{{ endorsement.end_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Update Project</button>
+                    <a href="{% url 'project_list' %}" class="btn btn-secondary ms-3">Back to Projects</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to save the form data to sessionStorage
+    function saveFormData() {
+        const form = document.getElementById('endorsement-form');
+        const formData = new FormData(form);
+
+        formData.forEach((value, key) => {
+            sessionStorage.setItem(key, value);
+        });
+    }
+
+    // Function to load the form data from sessionStorage
+    function loadFormData() {
+        const form = document.getElementById('endorsement-form');
+        
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+            const value = sessionStorage.getItem(input.name);
+            if (value) {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = value === input.value;
+                } else {
+                    input.value = value;
+                }
+            }
+        });
+    }
+
+    // Limit the number of PI selections to 6
+    function limitPISelection() {
+        const piCheckboxes = document.querySelectorAll('.pi-checkbox');
+        piCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const selectedCount = document.querySelectorAll('.pi-checkbox:checked').length;
+                if (selectedCount > 6) {
+                    this.checked = false;
+                    alert('You can only select up to 6 Principal Investigators.');
+                }
+                saveFormData();
+            });
+        });
+    }
+
+    // Form validation before submission
+    function validateForm(event) {
+        const form = document.getElementById('endorsement-form');
+        const requiredFields = form.querySelectorAll('[required]');
+        let valid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                valid = false;
+                field.classList.add('is-invalid');
+                field.scrollIntoView();
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!valid) {
+            event.preventDefault();
+            alert('Please fill out all required fields.');
+        } else {
+            // Clear session storage on successful submission
+            sessionStorage.clear();
+        }
+    }
+
+    // Event listeners
+    document.getElementById('endorsement-form').addEventListener('submit', validateForm);
+    document.getElementById('endorsement-form').addEventListener('input', saveFormData);
+    window.addEventListener('load', loadFormData);
+    window.addEventListener('load', limitPISelection);
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fade-in {
+        animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        font-size: 1.25rem;
+        text-transform: uppercase;
+    }
+
+    .table-bordered th, .table-bordered td {
+        vertical-align: middle;
+    }
+
+    .form-control {
+        box-shadow: none;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .alert-dismissible .btn-close {
+        padding: 0.75rem;
+    }
+
+    .alert-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .text-center h1 {
+        margin-bottom: 1.5rem;
+    }
+
+    #pi-container {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+    
