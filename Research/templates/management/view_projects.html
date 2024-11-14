@@ -21,7 +21,9 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h5 class="m-0 font-weight-bold text-primary">Projects List</h5>
-                    <button id="exportBtn" class="btn btn-success btn-sm ms-2"><i class="fas fa-file-excel"></i> Export to Excel</button>
+                    <a href="{% url 'export_projects_excel' %}" class="btn btn-success">
+                        <i class="fas fa-file-excel me-1"></i> Export to Excel
+                    </a>
                 </div>
 
                 <div class="card-body">
@@ -78,8 +80,8 @@
                             </div>
                             <!-- Search Bar -->
                             <div class="col-md-12">
-                                <label for="searchInput">Search by Sanctioned Order, Project Name, or ID</label>
-                                <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+                                <label for="searchInput">Search</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Sanctioned Order, Project Name, or ID or PI (Name,PSRN)">
                             </div>
                         </div>
                     </div>
@@ -110,6 +112,8 @@
                                     <th rowspan="2" class="align-middle text-center sticky-header">Project End Date</th>
                                     <th rowspan="2" class="align-middle text-center sticky-header">Total Amount Received (Rs)</th>
                                     <th rowspan="2" class="align-middle text-center sticky-header">Sanctioned Order</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Project Proposal</th>
+                                    <th rowspan="2" class="align-middle text-center sticky-header">Sanction Letter</th>
                                     <th rowspan="2" class="align-middle text-center sticky-header">Status</th>
                                     <th rowspan="2" class="align-middle text-center sticky-header">Actions</th>
                                 </tr>
@@ -264,6 +268,24 @@
                                     <td class="text-center">-</td>
                                     {% endif %}
                                     <td>
+                                        {% if project.project.proposal_file %}
+                                            <a href="{{ project.project.proposal_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-file-pdf me-1"></i>View File
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No file</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if project.project.sanction_letter %}
+                                            <a href="{{ project.project.sanction_letter.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-file-pdf me-1"></i>View File
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No file</span>
+                                        {% endif %}
+                                    </td>                                    
+                                    <td>
                                         {% if project.project.status == 'ongoing' %}
                                         <span class="badge bg-warning text-dark">Ongoing</span>
                                         {% else %}
@@ -345,167 +367,180 @@
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var confirmModal = document.getElementById('confirmModal');
+document.addEventListener('DOMContentLoaded', function () {
+    // Get all filter elements
+    const searchInput = document.getElementById('searchInput');
+    const filterDepartment = document.getElementById('filterDepartment');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterYear = document.getElementById('filterYear');
+    const filterProjectType = document.getElementById('filterProjectType');
+    const filterFundingAgencyType = document.getElementById('filterFundingAgencyType');
+
+    // Modal handling
+    var confirmModal = document.getElementById('confirmModal');
+    if (confirmModal) {
         confirmModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             var projectId = button.getAttribute('data-project-id');
             var confirmBtn = document.getElementById('confirmMarkCompleteBtn');
-            confirmBtn.href = "{% url 'mark_completed' 0 %}".replace('0', projectId);
+            confirmBtn.href = confirmBtn.href.replace('0', projectId);
         });
+    }
 
-        // Export to Excel function
-        document.getElementById('exportBtn').addEventListener('click', function () {
-            var wb = XLSX.utils.book_new();
-            var ws_data = [];
-            var ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-            // Define headers with merged cells
-            ws['!merges'] = [
-                { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // ID
-                { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, // Year of Project Sanction
-                { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } }, // Type of Project
-                { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } }, // Funding Agency Type
-                { s: { r: 0, c: 4 }, e: { r: 0, c: 8 } }, // Principal Investigator
-                { s: { r: 0, c: 9 }, e: { r: 0, c: 13 } }, // Co. PI-1
-                { s: { r: 0, c: 14 }, e: { r: 0, c: 18 } }, // Co. PI-2
-                { s: { r: 0, c: 19 }, e: { r: 0, c: 23 } }, // Co. PI-3
-                { s: { r: 0, c: 24 }, e: { r: 0, c: 28 } }, // Co. PI-4
-                { s: { r: 0, c: 29 }, e: { r: 0, c: 33 } }, // Co. PI-5
-                { s: { r: 0, c: 34 }, e: { r: 0, c: 38 } }, // Co. PI-6
-                { s: { r: 0, c: 39 }, e: { r: 1, c: 39 } }, // Funding Agency
-                { s: { r: 0, c: 40 }, e: { r: 1, c: 40 } }, // Scheme
-                { s: { r: 0, c: 41 }, e: { r: 1, c: 41 } }, // Project Name
-                { s: { r: 0, c: 42 }, e: { r: 0, c: 44 } }, // Sanctioned Amount
-                { s: { r: 0, c: 45 }, e: { r: 1, c: 45 } }, // Project Duration
-                { s: { r: 0, c: 46 }, e: { r: 1, c: 46 } }, // Sanctioned Date
-                { s: { r: 0, c: 47 }, e: { r: 1, c: 47 } }, // Project Start Date
-                { s: { r: 0, c: 48 }, e: { r: 1, c: 48 } }, // Project End Date
-                { s: { r: 0, c: 49 }, e: { r: 1, c: 49 } }, // Total Amount Received
-                { s: { r: 0, c: 50 }, e: { r: 1, c: 50 } }, // Sanctioned Order
-                { s: { r: 0, c: 51 }, e: { r: 1, c: 51 } }, // Status
-            ];
-
-            // First row headers
-            ws_data.push([
-                "ID", "Year of Project Sanction", "Type Of Project", "Funding Agency Type",
-                "Principal Investigator", "", "", "", "",
-                "Co. PI-1", "", "", "", "",
-                "Co. PI-2", "", "", "", "",
-                "Co. PI-3", "", "", "", "",
-                "Co. PI-4", "", "", "", "",
-                "Co. PI-5", "", "", "", "",
-                "Co. PI-6", "", "", "", "",
-                "Funding Agency", "Scheme", "Project Name", 
-                "Sanctioned-Amount (Rs)", "", "",
-                "Project Duration (Months)", "Sanctioned Date", "Project Start Date", "Project End Date", 
-                "Total Amount Received (Rs)", "Sanctioned Order", "Status"
-            ]);
-
-            // Second row headers
-            ws_data.push([
-                "", "", "", "",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "Name", "PSRN", "Designation", "Campus", "Department",
-                "", "", "",
-                "CAPEX", "RECURRING", "Total",
-                "", "", "", "", "", "", ""
-            ]);
-
-            // Add table data
-            var rows = document.querySelectorAll('#projectsTable tbody tr');
-            rows.forEach(function(row) {
-                var cells = row.querySelectorAll('td');
-                var rowData = Array.from(cells).slice(0, -1).map(function(cell) { // Exclude the last cell (Actions)
-                    return cell.innerText.trim();
-                });
-                ws_data.push(rowData);
-            });
-
-            XLSX.utils.sheet_add_aoa(ws, ws_data);
-
-            // Set column widths
-            ws['!cols'] = [
-                { width: 10 }, { width: 20 }, { width: 20 }, { width: 20 }, // ID, Year, Type, Funding Agency Type
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // PI columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI1 columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI2 columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI3 columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI4 columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI5 columns
-                { width: 20 }, { width: 10 }, { width: 20 }, { width: 15 }, { width: 15 }, // Co-PI6 columns
-                { width: 20 }, { width: 20 }, { width: 20 }, // Funding Agency, Scheme, Project Name
-                { width: 15 }, { width: 15 }, { width: 15 }, // CAPEX, RECURRING, Total
-                { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 } // Others
-            ];
-
-            // Center alignment and wrap text for all cells
-            Object.keys(ws).forEach(function(key) {
-                if (key[0] === '!') return; // Skip meta keys like !ref, !cols, etc.
-                ws[key].s = {
-                    alignment: {
-                        horizontal: "center",
-                        vertical: "center",
-                        wrapText: true
-                    }
-                };
-            });
-
-            XLSX.utils.book_append_sheet(wb, ws, "Projects List");
-            XLSX.writeFile(wb, "Projects_List.xlsx");
-        });
-
-        // Attach event listeners to filter and search elements
-        searchInput.addEventListener('keyup', filterTable);
-        filterDepartment.addEventListener('change', filterTable);
-        filterStatus.addEventListener('change', filterTable);
-        filterYear.addEventListener('change', filterTable);
-        filterProjectType.addEventListener('change', filterTable);
-        filterFundingAgencyType.addEventListener('change', filterTable);
-
-        function filterTable() {
-            var searchTerm = searchInput.value.toLowerCase();
-            var departmentTerm = filterDepartment.value.toLowerCase();
-            var statusTerm = filterStatus.value.toLowerCase();
-            var yearTerm = filterYear.value.toLowerCase();
-            var projectTypeTerm = filterProjectType.value.toLowerCase();
-            var fundingAgencyTypeTerm = filterFundingAgencyType.value.toLowerCase();
-
-            // Get all table rows except the header
-            var table = document.getElementById('projectsTable');
-            var rows = Array.from(table.getElementsByTagName('tr')).slice(2);
-
-            rows.forEach(function (row) {
-                var cells = row.getElementsByTagName('td');
-                var id = cells[0].textContent.toLowerCase();
-                var year = cells[1].textContent.toLowerCase();
-                var projectType = cells[2].textContent.toLowerCase();
-                var fundingAgencyType = cells[3].textContent.toLowerCase();
-                var piDepartment = cells[8].textContent.toLowerCase();
-                var projectName = cells[20].textContent.toLowerCase();
-                var sanctionedOrder = cells[31].textContent.toLowerCase();
-                var status = cells[51].textContent.toLowerCase();
-
-                var matchesSearch = searchTerm === "" || id.includes(searchTerm) || projectName.includes(searchTerm) || sanctionedOrder.includes(searchTerm);
-                var matchesDepartment = departmentTerm === "" || piDepartment.includes(departmentTerm);
-                var matchesStatus = statusTerm === "" || status.includes(statusTerm);
-                var matchesYear = yearTerm === "" || year.includes(yearTerm);
-                var matchesProjectType = projectTypeTerm === "" || projectType.includes(projectTypeTerm);
-                var matchesFundingAgencyType = fundingAgencyTypeTerm === "" || fundingAgencyType.includes(fundingAgencyTypeTerm);
-
-                if (matchesSearch && matchesDepartment && matchesStatus && matchesYear && matchesProjectType && matchesFundingAgencyType) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
+    // Add event listeners to all filters
+    [searchInput, filterDepartment, filterStatus, filterYear, 
+     filterProjectType, filterFundingAgencyType].forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', filterTable);
+            filter.addEventListener('keyup', filterTable);
         }
     });
+
+    // Enhanced search function that handles multiple keywords
+    function matchesSearchTerms(text, searchTerms) {
+        if (!searchTerms.length) return true;
+        text = text.toLowerCase();
+        return searchTerms.every(term => text.includes(term));
+    }
+
+    function filterTable() {
+        // Clean and split search terms, handling multiple spaces
+        const searchTerms = searchInput.value
+            .toLowerCase()
+            .trim()
+            .split(/\s+/)
+            .filter(term => term.length > 0);
+
+        const departmentTerm = filterDepartment.value.toLowerCase();
+        const statusTerm = filterStatus.value.toLowerCase();
+        const yearTerm = filterYear.value.toLowerCase();
+        const projectTypeTerm = filterProjectType.value.toLowerCase();
+        const fundingAgencyTypeTerm = filterFundingAgencyType.value.toLowerCase();
+
+        // Get table and rows
+        const table = document.getElementById('projectsTable');
+        const tbody = table.getElementsByTagName('tbody')[0];
+        const rows = tbody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            if (cells.length === 0) return; // Skip if no cells (header row)
+
+            // Get values from relevant cells
+            const searchableFields = {
+                id: cells[0].textContent.trim(),
+                year: cells[1].textContent.trim(),
+                projectType: cells[2].textContent.trim(),
+                fundingAgencyType: cells[3].textContent.trim(),
+                piName: cells[4].textContent.trim(),
+                piPSRN: cells[5].textContent.trim(),
+                piDesignation: cells[6].textContent.trim(),
+                piCampus: cells[7].textContent.trim(),
+                piDepartment: cells[8].textContent.trim(),
+                fundingAgency: cells[39].textContent.trim(),
+                projectName: cells[42].textContent.trim(),
+                sanctionOrder: cells[50].textContent.trim(),
+                status: cells[53].textContent.trim()
+            };
+
+            // Combine all searchable text
+            const searchableText = Object.values(searchableFields).join(' ');
+
+            // Check if row matches all filters
+            const matchesSearch = matchesSearchTerms(searchableText, searchTerms);
+
+            const matchesDepartment = !departmentTerm || 
+                searchableFields.piDepartment.toLowerCase().includes(departmentTerm);
+
+            const matchesStatus = !statusTerm || 
+                searchableFields.status.toLowerCase().includes(statusTerm);
+
+            const matchesYear = !yearTerm || 
+                searchableFields.year.toLowerCase().includes(yearTerm);
+
+            const matchesProjectType = !projectTypeTerm || 
+                searchableFields.projectType.toLowerCase().includes(projectTypeTerm);
+
+            const matchesFundingAgencyType = !fundingAgencyTypeTerm || 
+                searchableFields.fundingAgencyType.toLowerCase().includes(fundingAgencyTypeTerm);
+
+            // Show/hide row based on all filters
+            if (matchesSearch && matchesDepartment && matchesStatus && 
+                matchesYear && matchesProjectType && matchesFundingAgencyType) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update results count or show no results message
+        updateResultsCount();
+    }
+
+    // Function to update results count
+    function updateResultsCount() {
+        const table = document.getElementById('projectsTable');
+        const tbody = table.getElementsByTagName('tbody')[0];
+        const visibleRows = Array.from(tbody.getElementsByTagName('tr'))
+            .filter(row => row.style.display !== 'none').length;
+
+        // Create or update results count element
+        let resultCount = document.getElementById('resultCount');
+        if (!resultCount) {
+            resultCount = document.createElement('div');
+            resultCount.id = 'resultCount';
+            resultCount.className = 'mt-2 text-muted';
+            table.parentNode.insertBefore(resultCount, table);
+        }
+
+        // Update the count text
+        resultCount.textContent = `Showing ${visibleRows} ${visibleRows === 1 ? 'result' : 'results'}`;
+    }
+
+    // Excel export functionality
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            const table = document.getElementById('projectsTable');
+            const wb = XLSX.utils.book_new();
+            
+            // Get visible rows only
+            const visibleRows = Array.from(table.querySelectorAll('tbody tr'))
+                .filter(row => row.style.display !== 'none');
+
+            // Create worksheet data
+            const wsData = [];
+            
+            // Add headers
+            const headers = Array.from(table.querySelectorAll('thead tr'))
+                .map(row => Array.from(row.cells).map(cell => cell.textContent.trim()));
+            wsData.push(...headers);
+
+            // Add visible rows data
+            visibleRows.forEach(row => {
+                const rowData = Array.from(row.cells)
+                    .slice(0, -1) // Exclude the actions column
+                    .map(cell => cell.textContent.trim());
+                wsData.push(rowData);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Add column widths and styling
+            ws['!cols'] = Array(wsData[0].length).fill({ wch: 15 });
+            
+            // Add the worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Projects List");
+            
+            // Generate and download the file with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            XLSX.writeFile(wb, `Projects_List_${timestamp}.xlsx`);
+        });
+    }
+
+    // Initial filter on page load
+    filterTable();
+});
 </script>
 
 {% endblock %}

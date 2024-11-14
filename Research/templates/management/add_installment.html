@@ -29,7 +29,7 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" class="mb-4">
+                <form method="POST" enctype="multipart/form-data" class="mb-4">
                     {% csrf_token %}
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -44,6 +44,10 @@
                         <div class="col-md-6">
                             <label for="amount" class="form-label">Amount (in Rs):<span class="text-danger">*</span></label>
                             <input type="number" id="amount" name="amount" class="form-control" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="file" class="form-label">File:</label>
+                            <input type="file" id="file" name="file" class="form-control" required>
                         </div>
                     </div>
                     <div class="text-center">
@@ -60,6 +64,7 @@
                         <tr>
                             <th>Financial Year</th>
                             <th>Amount (in Rs)</th>
+                            <th>File</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -68,6 +73,15 @@
                         <tr>
                             <td>{{ installment.installment_year.name }}</td>
                             <td>{{ installment.amount }}</td>
+                                   <td>
+                                {% if installment.file %}
+                                    <a href="{{ installment.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-pdf me-1"></i>View File
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">No file</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 <a href="{% url 'edit_installment' project.id installment.id %}" class="btn btn-warning btn-sm">Edit</a>
                                 <a href="{% url 'bifurcate_budget' project.id installment.id %}" class="btn btn-info btn-sm">Bifurcate Budget</a>
@@ -80,7 +94,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center">No installments added yet.</td>
+                            <td colspan="4" class="text-center">No installments added yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -90,7 +104,6 @@
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -120,12 +133,12 @@ function setDeleteUrl(url) {
 {% block extra_css %}
 <style>
     .table-bordered {
-        border: 2px solid #000; /* Bold border around the entire table */
+        border: 2px solid #000; 
     }
 
     .table-bordered th, 
     .table-bordered td {
-        border: 2px solid #000; /* Bold border around each cell */
+        border: 2px solid #000; 
     }
 
     .fade-in {

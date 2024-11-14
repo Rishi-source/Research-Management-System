@@ -177,8 +177,199 @@ Dashboard
       </a>
     </div>
   </div>
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Total Project Budget by Department</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="departmentChart" style="min-height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  
+  <!-- Required CSS -->
+  <style>
+  .border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+  }
+  .border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+  }
+  .chart-area {
+    position: relative;
+    height: 400px;
+    width: 100%;
+  }
+  .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+  }
+  </style>
+  
+  <!-- Required JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const departmentData = {{ department_data|safe }};
+        
+        // Function to abbreviate department names
+        function abbreviateDepartment(name) {
+            // Common department abbreviations
+            const abbreviations = {
+                'Computer Science and Information Systems': 'CSIS',
+                'Electronics and Communication Engineering': 'ECE',
+                'Mechanical Engineering': 'ME',
+                'Electrical and Electronics Engineering': 'EEE',
+                'Chemical Engineering': 'ChE',
+                'Civil Engineering': 'CE',
+                'Biotechnology': 'BT',
+                'Information Technology': 'IT'
+                // Add more abbreviations as needed
+            };
     
-  <div class="modal fade" id="mobileWarningModal" tabindex="-1" aria-labelledby="mobileWarningModalLabel" aria-hidden="true">
+            // Return abbreviation if it exists, otherwise keep original if less than 15 characters
+            if (abbreviations[name]) {
+                return abbreviations[name];
+            }
+            return name.length > 15 ? name.match(/\b([A-Za-z])/g).join('') : name;
+        }
+    
+        // Process department names
+        const processedLabels = departmentData.departments.map(dept => abbreviateDepartment(dept));
+        
+        // Function to format numbers in Indian format
+        function formatIndianCurrency(amount) {
+            if (amount >= 10000000) {
+                return '₹' + (amount / 10000000).toFixed(2) + ' Cr';
+            } else if (amount >= 100000) {
+                return '₹' + (amount / 100000).toFixed(2) + ' L';
+            } else if (amount >= 1000) {
+                return '₹' + (amount / 1000).toFixed(2) + ' K';
+            }
+            return '₹' + amount.toFixed(2);
+        }
+    
+        // Create gradient for bars
+        const ctx = document.getElementById('departmentChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(78, 115, 223, 0.8)');
+        gradient.addColorStop(1, 'rgba(78, 115, 223, 0.1)');
+    
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: processedLabels,
+                datasets: [{
+                    label: 'Total Budget',
+                    data: departmentData.amounts,
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    barThickness: 50,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxRotation: 0,  // Keep labels horizontal
+                            minRotation: 0,  // Keep labels horizontal
+                            padding: 10,
+                            font: {
+                                size: 12,
+                                family: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
+                                weight: '500'
+                            }
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value) {
+                                return formatIndianCurrency(value);
+                            },
+                            font: {
+                                size: 12,
+                                family: "'Segoe UI', 'Roboto', 'Arial', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyColor: "#858796",
+                        titleMarginBottom: 10,
+                        titleColor: '#6e707e',
+                        titleFont: {
+                            size: 14
+                        },
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                // Show full department name in tooltip
+                                const index = tooltipItems[0].dataIndex;
+                                return departmentData.departments[index];
+                            },
+                            label: function(context) {
+                                return 'Total Budget: ' + formatIndianCurrency(context.raw);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+      <div class="modal fade" id="mobileWarningModal" tabindex="-1" aria-labelledby="mobileWarningModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">

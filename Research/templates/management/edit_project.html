@@ -15,17 +15,19 @@
             <h1 class="text-center text-uppercase mb-4 fade-in">Edit Sanctioned Project</h1>
 
             <!-- Display Success or Error Messages -->
-            {% if messages %}
-            <div class="alert-container">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="col-md-10 offset-md-2" id="messages">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                  {{ error }}
                 </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
+                {% endif %}
+                {% if success %}
+                <div class="alert alert-success" role="alert">
+                  {{ success }}
+                </div>
+                {% endif %}
+              </div>
+            
             <form id="endorsement-form" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
@@ -108,65 +110,122 @@
                 </div>
 
                 <!-- Additional Details Section -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="mb-0"><strong>Additional Details</strong></h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="project_type" class="form-label">Project Type:</label>
-                                <select id="project_type" name="project_type" class="form-select">
-                                    <option value="">-- Select Project Type --</option>
-                                    <option value="Government" {% if endorsement.project_type == 'Government' %}selected{% endif %}>Government</option>
-                                    <option value="Industry Sponsored Project" {% if endorsement.project_type == 'Industry Sponsored Project' %}selected{% endif %}>Industry Sponsored Project</option>
-                                    <option value="Consultancy Project" {% if endorsement.project_type == 'Consultancy Project' %}selected{% endif %}>Consultancy Project</option>
-                                    <option value="International Project" {% if endorsement.project_type == 'International Project' %}selected{% endif %}>International Project</option>
-                                    <option value="Alumni Project" {% if endorsement.project_type == 'Alumni Project' %}selected{% endif %}>Alumni Project</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="funding_agency" class="form-label">Funding Agency:</label>
-                                <input type="text" id="funding_agency" name="funding_agency" class="form-control" value="{{ endorsement.funding_agency }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="funding_scheme" class="form-label">Funding Scheme:</label>
-                                <input type="text" id="funding_scheme" name="funding_scheme" class="form-control" value="{{ endorsement.funding_scheme }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="funding_agency_type" class="form-label">Funding Agency Type:</label>
-                                <select id="funding_agency_type" name="funding_agency_type" class="form-select">
-                                    <option value="">-- Select Funding Agency Type --</option>
-                                    <option value="Government Project" {% if endorsement.funding_agency_type == 'Government Project' %}selected{% endif %}>Government Project</option>
-                                    <option value="Non-Governmental Organization in India" {% if endorsement.funding_agency_type == 'Non-Governmental Organization in India' %}selected{% endif %}>Non-Governmental Organization in India</option>
-                                    <option value="International" {% if endorsement.funding_agency_type == 'International' %}selected{% endif %}>International</option>
-                                    <option value="Industry" {% if endorsement.funding_agency_type == 'Industry' %}selected{% endif %}>Industry</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="CAPEX" class="form-label">CAPEX:</label>
-                                <input type="number" id="CAPEX" name="CAPEX" class="form-control" value="{{ endorsement.CAPEX }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="OPEX" class="form-label">OPEX:</label>
-                                <input type="number" id="OPEX" name="OPEX" class="form-control" value="{{ endorsement.OPEX }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="project_duration" class="form-label">Project Duration (months):</label>
-                                <input type="number" id="project_duration" name="project_duration" class="form-control" value="{{ endorsement.project_duration }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="commencement_date_of_project" class="form-label">Start Date of Project:</label>
-                                <input type="date" id="commencement_date_of_project" name="commencement_date_of_project" class="form-control" value="{{ endorsement.start_date|date:'Y-m-d' }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="end_date_of_project" class="form-label">End Date of Project:</label>
-                                <input type="date" id="end_date_of_project" name="end_date_of_project" class="form-control" value="{{ endorsement.end_date|date:'Y-m-d' }}" />
+<!-- Additional Details Section -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h2 class="mb-0"><strong>Additional Details</strong></h2>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- First Column -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="project_type" class="form-label">Project Type:</label>
+                    <select id="project_type" name="project_type" class="form-select">
+                        <option value="">-- Select Project Type --</option>
+                        <option value="Government" {% if endorsement.project_type == 'Government' %}selected{% endif %}>Government</option>
+                        <option value="Industry Sponsored Project" {% if endorsement.project_type == 'Industry Sponsored Project' %}selected{% endif %}>Industry Sponsored Project</option>
+                        <option value="Consultancy Project" {% if endorsement.project_type == 'Consultancy Project' %}selected{% endif %}>Consultancy Project</option>
+                        <option value="International Project" {% if endorsement.project_type == 'International Project' %}selected{% endif %}>International Project</option>
+                        <option value="Alumni Project" {% if endorsement.project_type == 'Alumni Project' %}selected{% endif %}>Alumni Project</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="funding_scheme" class="form-label">Funding Scheme:</label>
+                    <input type="text" id="funding_scheme" name="funding_scheme" class="form-control" value="{{ endorsement.funding_scheme }}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="CAPEX" class="form-label">CAPEX:</label>
+                    <input type="number" id="CAPEX" name="CAPEX" class="form-control" value="{{ endorsement.CAPEX }}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="project_duration" class="form-label">Project Duration (months):</label>
+                    <input type="number" id="project_duration" name="project_duration" class="form-control" value="{{ endorsement.project_duration }}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="end_date_of_project" class="form-label">End Date of Project:</label>
+                    <input type="date" id="end_date_of_project" name="end_date_of_project" class="form-control" value="{{ endorsement.end_date|date:'Y-m-d' }}" />
+                </div>
+            </div>
+
+            <!-- Second Column -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="funding_agency" class="form-label">Funding Agency:</label>
+                    <input type="text" id="funding_agency" name="funding_agency" class="form-control" value="{{ endorsement.funding_agency }}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="funding_agency_type" class="form-label">Funding Agency Type:</label>
+                    <select id="funding_agency_type" name="funding_agency_type" class="form-select">
+                        <option value="">-- Select Funding Agency Type --</option>
+                        <option value="Government Project" {% if endorsement.funding_agency_type == 'Government Project' %}selected{% endif %}>Government Project</option>
+                        <option value="Non-Governmental Organization in India" {% if endorsement.funding_agency_type == 'Non-Governmental Organization in India' %}selected{% endif %}>Non-Governmental Organization in India</option>
+                        <option value="International" {% if endorsement.funding_agency_type == 'International' %}selected{% endif %}>International</option>
+                        <option value="Industry" {% if endorsement.funding_agency_type == 'Industry' %}selected{% endif %}>Industry</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="OPEX" class="form-label">OPEX:</label>
+                    <input type="number" id="OPEX" name="OPEX" class="form-control" value="{{ endorsement.OPEX }}" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="commencement_date_of_project" class="form-label">Start Date of Project:</label>
+                    <input type="date" id="commencement_date_of_project" name="commencement_date_of_project" class="form-control" value="{{ endorsement.start_date|date:'d-m-Y' }}" />
+                </div>
+
+                <!-- File Upload Fields -->
+                <div class="mb-3">
+                    <label class="form-label">Project Proposal:</label>
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            {% if endorsement.proposal_file %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    <span>{{ endorsement.proposal_file.name|slice:"19:" }}</span>
+                                </div>
+                                <a href="{{ endorsement.proposal_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mb-2">
+                                    <i class="fas fa-external-link-alt me-1"></i> View Current File
+                                </a>
+                            {% endif %}
+                            <div class="mt-2">
+                                <label class="text-muted small">Upload new file (optional):</label>
+                                <input type="file" name="project_proposal" class="form-control" accept=".pdf">
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Sanction Letter:</label>
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            {% if endorsement.sanction_letter %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    <span>{{ endorsement.sanction_letter.name|slice:"16:" }}</span>
+                                </div>
+                                <a href="{{ endorsement.sanction_letter.url }}" target="_blank" class="btn btn-sm btn-outline-primary mb-2">
+                                    <i class="fas fa-external-link-alt me-1"></i> View Current File
+                                </a>
+                            {% endif %}
+                            <div class="mt-2">
+                                <label class="text-muted small">Upload new file (optional):</label>
+                                <input type="file" name="sanction_letter" class="form-control" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                 <!-- Submit Button -->
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary">Update Project</button>
@@ -178,7 +237,6 @@
 </div>
 
 <script>
-    // Function to save the form data to sessionStorage
     function saveFormData() {
         const form = document.getElementById('endorsement-form');
         const formData = new FormData(form);
@@ -187,6 +245,19 @@
             sessionStorage.setItem(key, value);
         });
     }
+    function filterPIList() {
+    const searchText = document.getElementById('pi-search').value.toLowerCase().trim();
+    const piItems = document.querySelectorAll('.pi-item');
+    
+    piItems.forEach(item => {
+        const piName = item.querySelector('.form-check-label').textContent.toLowerCase();
+        if (piName.includes(searchText)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
 
     // Function to load the form data from sessionStorage
     function loadFormData() {
@@ -250,19 +321,109 @@
     window.addEventListener('load', loadFormData);
     window.addEventListener('load', limitPISelection);
 </script>
-{% endblock %}
-
-{% block extra_css %}
 <style>
-    .fade-in {
-        animation: fadeIn 1.5s ease-in-out;
+    /* Previous styles remain the same, add these new styles */
+    .file-card {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
     }
 
-    @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
+    .file-icon {
+        font-size: 24px;
+        margin-right: 10px;
+        color: #dc3545;
     }
 
+    .file-info {
+        flex-grow: 1;
+    }
+
+    .file-name {
+        margin-bottom: 0;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-control:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    .file-preview {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-body {
+        background-color: #f8f9fa;
+    }
+
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .fa-external-link-alt {
+        font-size: 0.875rem;
+    }
+    .pi-list-container {
+    max-height: 300px;
+    border-radius: 0.375rem;
+    padding: 0rem;
+    background-color: #fff;
+}
+
+
+.pi-item:last-child {
+    border-bottom: none;
+}
+
+.pi-search-container {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    z-index: 1000;
+}
+
+.form-check-label {
+    cursor: pointer;
+    padding: 0.25rem 0;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+</style>
+<style>
     .card-header {
         background-color: #007bff;
         color: white;

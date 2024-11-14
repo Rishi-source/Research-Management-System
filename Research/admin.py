@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+
 admin.site.site_header = " Research Management System "
 admin.site.site_title = " Research Admin Portal"
 admin.site.index_title = "Welcome to Research Management System Admin"
@@ -13,4 +14,3 @@ admin.site.register(RecievedAmount)
 admin.site.register(Installment)
 admin.site.register(FinancialYear)
 admin.site.register(Expenditure)
-
