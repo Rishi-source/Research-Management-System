@@ -132,7 +132,7 @@ def dashboard(request):
             or 0
         )
 
-        if total_sanctioned > 0:  # Only include departments with projects
+        if total_sanctioned > 0:
             department_data["departments"].append(dept.name)
             department_data["amounts"].append(float(total_sanctioned))
 
@@ -1439,7 +1439,7 @@ def export_projects_excel(request):
             current_column += 1
 
     amount_start_column = 1
-    for header in main_headers[:14]:
+    for header in main_headers[:15]:
         amount_start_column += header["width"]
 
     for idx, subheader in enumerate(["CAPEX", "RECURRING", "Total"]):
